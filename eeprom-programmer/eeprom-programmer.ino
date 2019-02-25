@@ -1,16 +1,24 @@
-#define SHIFT_DATA 2
-#define SHIFT_CLK 3
-#define SHIFT_LATCH 4
-#define EEPROM_D0 5
-#define EEPROM_D7 12
-#define WRITE_EN 13
+#define SHIFT_DATA A0
+#define SHIFT_CLK A2
+#define SHIFT_LATCH A1
+#define WRITE_EN A5
+#define OUT_EN A4
+#define CHIP_EN A3
+#define EEPROM_D0 2
+#define EEPROM_D7 9
 
 /*
  * Output the address bits and outputEnable signal using shift registers.
  */
 void setAddress(int address, bool outputEnable) {
-  shiftOut(SHIFT_DATA, SHIFT_CLK, MSBFIRST, (address >> 8) | (outputEnable ? 0x00 : 0x80));
+  shiftOut(SHIFT_DATA, SHIFT_CLK, MSBFIRST, (address >> 8));
   shiftOut(SHIFT_DATA, SHIFT_CLK, MSBFIRST, address);
+
+  if(outputEnable){
+    digitalWrite(OUT_EN, LOW);
+  } else {
+    digitalWrite(OUT_EN, HIGH);
+  }
 
   digitalWrite(SHIFT_LATCH, LOW);
   digitalWrite(SHIFT_LATCH, HIGH);
@@ -89,6 +97,11 @@ void setup() {
   pinMode(SHIFT_LATCH, OUTPUT);
   digitalWrite(WRITE_EN, HIGH);
   pinMode(WRITE_EN, OUTPUT);
+  pinMode(OUT_EN, OUTPUT);
+  pinMode(CHIP_EN, OUTPUT);
+  digitalWrite(CHIP_EN, LOW);
+
+  
   Serial.begin(57600);
 
   // Erase entire EEPROM
